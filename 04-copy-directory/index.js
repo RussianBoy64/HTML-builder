@@ -5,8 +5,6 @@ const { mkdir, copyFile } = require('fs/promises')
 
 const originalPath = path.join(__dirname, 'files')
 const copyPath = path.join(__dirname, 'files-copy')
-console.log(originalPath)
-// const copyPath = mkdir
 
 const readOriginFolder = async (err, files) => {
   if (err) stdout.write(err.message)
