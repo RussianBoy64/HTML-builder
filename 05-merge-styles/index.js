@@ -21,13 +21,8 @@ const readStylesFolder = (err, files) => {
 
       const readStream = fs.createReadStream(filePath, 'utf-8')
 
-      readStream.on('data', (chunk) => writeStream.write(chunk))
-
-      readStream.on('data', (chunk) => {
-        writeStream.write(chunk)
-      })
-
-      // readStream.pipe(writeStream)
+      // write to boundle
+      readStream.pipe(writeStream)
     }
   })
 }
