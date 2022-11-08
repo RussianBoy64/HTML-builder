@@ -10,7 +10,7 @@ const readOriginFolder = async (err, files) => {
   if (err) stdout.write(err.message)
 
   // remove folder if it exists
-  await rm(copyPath, { recursive: true })
+  await rm(copyPath, { recursive: true, force: true })
   // create copy folder
   await mkdir(copyPath, { recursive: true })
 
