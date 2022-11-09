@@ -10,14 +10,7 @@ const deployedIndexPath = path.join(projectPath, 'index.html')
 const stylesPath = path.join(__dirname, 'styles')
 const deployedStylesPath = path.join(projectPath, 'style.css')
 const assetsPath = path.join(__dirname, 'assets')
-const fontsPath = path.join(assetsPath, 'fonts')
-console.log(fontsPath)
-const imgPath = path.join(assetsPath, 'img')
-const svgPath = path.join(assetsPath, 'svg')
 const deployedAssetsPath = path.join(projectPath, 'assets')
-const deployedFontsPath = path.join(deployedAssetsPath, 'fonts')
-const deployedImgPath = path.join(deployedAssetsPath, 'img')
-const deployedDvgPath = path.join(deployedAssetsPath, 'svg')
 
 const createIndexHTML = (err, files) => {
   if (err) stdout.write(err.message)
@@ -79,48 +72,26 @@ const addStyles = (err, files) => {
   })
 }
 
-const copyFonts = async (err, files) => {
-  if (err) stdout.write(err.message)
+const copyAssets = async (originDir, deployDir) => {
+  // remove existing folder
+  await rm(deployDir, { recursive: true, force: true })
 
   // craate new folder
-  await mkdir(deployedFontsPath, { recursive: true })
+  await mkdir(deployDir, { recursive: true })
 
-  // copy files
-  files.forEach(async (file) => {
-    const originFilePath = path.join(fontsPath, file)
-    const copyFilePath = path.join(deployedFontsPath, file)
+  fs.readdir(originDir, { withFileTypes: true }, (err, files) => {
+    if (err) stdout.write(err.message)
 
-    await copyFile(originFilePath, copyFilePath)
-  })
-}
+    files.forEach((file) => {
+      const originPath = path.join(originDir, file.name)
+      const deployPath = path.join(deployDir, file.name)
 
-const copyImgs = async (err, files) => {
-  if (err) stdout.write(err.message)
-
-  // craate new folder
-  await mkdir(deployedImgPath, { recursive: true })
-
-  // copy files
-  files.forEach(async (file) => {
-    const originFilePath = path.join(imgPath, file)
-    const copyFilePath = path.join(deployedImgPath, file)
-
-    await copyFile(originFilePath, copyFilePath)
-  })
-}
-
-const copySvgs = async (err, files) => {
-  if (err) stdout.write(err.message)
-
-  // craate new folder
-  await mkdir(deployedDvgPath, { recursive: true })
-
-  // copy files
-  files.forEach(async (file) => {
-    const originFilePath = path.join(svgPath, file)
-    const copyFilePath = path.join(deployedDvgPath, file)
-
-    await copyFile(originFilePath, copyFilePath)
+      if (file.isFile()) {
+        copyFile(originPath, deployPath)
+      } else {
+        copyAssets(originPath, deployPath)
+      }
+    })
   })
 }
 
@@ -132,17 +103,10 @@ const createPage = async () => {
   await mkdir(projectPath, { recursive: true })
 
   fs.readdir(componentsPath, { withFileTypes: true }, createIndexHTML)
+
   fs.readdir(stylesPath, { withFileTypes: true }, addStyles)
 
-  // remove existing folder
-  await rm(deployedAssetsPath, { recursive: true, force: true })
-
-  // craate new folder
-  await mkdir(deployedAssetsPath, { recursive: true })
-
-  fs.readdir(fontsPath, copyFonts)
-  fs.readdir(imgPath, copyImgs)
-  fs.readdir(svgPath, copySvgs)
+  copyAssets(assetsPath, deployedAssetsPath)
 }
 
 createPage()
